@@ -127,6 +127,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Profile routes
+  app.put('/api/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { email, firstName, lastName } = req.body;
+      
+      await storage.updateUserProfile(userId, { email, firstName, lastName });
+      const user = await storage.getUser(userId);
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  app.put('/api/change-password', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { currentPassword, newPassword } = req.body;
+      
+      const success = await storage.changePassword(userId, currentPassword, newPassword);
+      if (!success) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+      
+      res.json({ message: "Password changed successfully" });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
+  app.delete('/api/account', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      await storage.deleteUser(userId);
+      
+      req.logout((err) => {
+        if (err) {
+          console.error("Error logging out after account deletion:", err);
+        }
+        res.json({ message: "Account deleted successfully" });
+      });
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      res.status(500).json({ message: "Failed to delete account" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -4,6 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { getBadgeInfo } from "@/lib/badges";
 import { VERSION_INFO } from "@/lib/version";
+import { Link } from "wouter";
 import type { User } from "@shared/schema";
 
 export default function Navigation() {
@@ -101,22 +102,14 @@ export default function Navigation() {
                   id="user-dropdown"
                   className="hidden absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50"
                 >
-                  <a 
-                    href="#" 
-                    className="flex items-center px-4 py-2 text-white hover:bg-gray-700 rounded-t-lg"
-                    data-testid="link-profile"
-                  >
+                  <Link href="/profile" className="flex items-center px-4 py-2 text-white hover:bg-gray-700 rounded-t-lg" data-testid="link-profile">
                     <i className="fas fa-user mr-2"></i>
                     Profile
-                  </a>
-                  <a 
-                    href="#" 
-                    className="flex items-center px-4 py-2 text-white hover:bg-gray-700"
-                    data-testid="link-settings"
-                  >
+                  </Link>
+                  <Link href="/settings" className="flex items-center px-4 py-2 text-white hover:bg-gray-700" data-testid="link-settings">
                     <i className="fas fa-cog mr-2"></i>
                     Settings
-                  </a>
+                  </Link>
                   <hr className="border-gray-700" />
                   <button 
                     onClick={handleLogout}

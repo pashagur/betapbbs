@@ -29,6 +29,10 @@ export interface IStorage {
   deleteMessage(messageId: number, userId: string): Promise<boolean>;
   getMessageCount(): Promise<number>;
   
+  // Profile operations
+  updateUserProfile(userId: string, data: { email?: string; firstName?: string; lastName?: string }): Promise<void>;
+  changePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean>;
+  
   // Admin operations
   getAllUsers(): Promise<User[]>;
   updateUserRole(userId: string, role: number): Promise<void>;
@@ -153,6 +157,40 @@ export class DatabaseStorage implements IStorage {
   async getMessageCount(): Promise<number> {
     const [result] = await db.select({ count: count() }).from(messages);
     return result.count;
+  }
+
+  // Profile operations
+  async updateUserProfile(userId: string, data: { email?: string; firstName?: string; lastName?: string }): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean> {
+    const user = await this.getUser(userId);
+    if (!user || !user.passwordHash) {
+      return false;
+    }
+
+    const isValidCurrentPassword = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isValidCurrentPassword) {
+      return false;
+    }
+
+    const newHashedPassword = await bcrypt.hash(newPassword, 12);
+    await db
+      .update(users)
+      .set({
+        passwordHash: newHashedPassword,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+    
+    return true;
   }
 
   // Admin operations
