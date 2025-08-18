@@ -92,13 +92,18 @@ export function setupAuth(app: Express) {
   // Registration route
   app.post("/api/register", async (req, res, next) => {
     try {
-      const registerSchema = insertUserSchema.extend({
-        confirmPassword: z.string(),
+      const registerSchema = z.object({
+        username: z.string().min(1, "Username is required"),
+        email: z.string().email().optional().or(z.literal("")),
+        password: z.string().min(8, "Password must be at least 8 characters"),
+        confirmPassword: z.string().min(1, "Password confirmation is required"),
       });
 
+      console.log("Registration data received:", req.body);
       const { username, email, password, confirmPassword } = registerSchema.parse(req.body);
 
       // Validate password confirmation
+      console.log("Password comparison:", { password: password?.length, confirmPassword: confirmPassword?.length, match: password === confirmPassword });
       if (password !== confirmPassword) {
         return res.status(400).json({ message: "Passwords do not match" });
       }
