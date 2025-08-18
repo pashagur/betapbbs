@@ -1,0 +1,78 @@
+Create a non Flask-based bulletin board web application with the following exact specifications:
+
+**Core Features:**
+- User registration and authentication system with secure password hashing
+- Community bulletin board where authenticated users can post messages
+- User profile system with activity badges based on posting frequency
+- Responsive Bootstrap dark-themed UI with Font Awesome icons
+- PostgreSQL database support with SQLite fallback for development
+- Some users are admins and can remove other users or change their profiles
+
+**Technical Architecture:**
+- Do not use Flask web framework 
+
+**Database Schema:**
+1. **User Model** with these exact fields:
+   - id (Integer, primary key)
+   - username (String 64, unique, required)
+   - email (String 120, unique, required) 
+   - password_hash (String 256, required)
+   - date_joined (DateTime, default now)
+   - is_active (Boolean, default True)
+   - post_count (Integer, default 0)
+   - avatar_url (Text, optional)
+   - role (Integer, default 0)
+
+2. **Message Model** with these exact fields:
+   - id (Integer, primary key)
+   - content (Text, required, max 500 chars)
+   - timestamp (DateTime, default now)
+   - user_id (Integer, foreign key to User)
+
+**User Badge System:**
+Create an activity badge system in the User model with these exact tiers:
+- New Member (0-4 posts): gray user icon
+- Active Member (5-9 posts): blue thumbs-up icon
+- Bronze Contributor (10-24 posts): bronze star icon
+- Silver Contributor (25-49 posts): silver award icon
+- Gold Contributor (50+ posts): gold trophy icon
+
+**UI Components:**
+- Message cards with hover effects and user badges
+- Responsive design for mobile devices
+- Form validation with real-time feedback
+
+**JavaScript Features:**
+- Message deletion confirmation dialogs
+- Character counter for message input (500 max)
+- Password requirements display on registration
+- Auto-dismissing flash messages (5 seconds)
+- Form validation feedback
+
+**Version System:**
+Include a version.py file with version tracking:
+- Major.Minor.Patch format (start at 1.2.1)
+- Build date and release name tracking
+- Version display in navigation bar
+
+**Security Features:**
+- Secure password hashing
+- User authentication required for bulletin access
+- ProxyFix middleware for reverse proxy deployment
+
+**Configuration:**
+- Environment-based database URL (PostgreSQL production, SQLite development)
+- Session secret from environment variables
+- Database connection pooling with health checks
+- Gunicorn WSGI server configuration for production
+
+**Functionality Requirements:**
+- Auto-increment user post_count when posting messages
+- Display user badges with appropriate colors and icons
+- Show total message count on bulletin board
+- Enable message deletion by original author
+- Avatar URL support with fallback to default icon
+- Real-time character counting for message input
+- Timestamp display with readable formatting
+
+Make sure to implement proper error handling, form validation, and responsive design exactly as described. The application should be production-ready with secure authentication and a polished user interface.
