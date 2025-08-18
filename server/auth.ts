@@ -20,8 +20,9 @@ export function setupAuth(app: Express) {
   // Session configuration
   const sessionStore = new PostgresSessionStore({
     conString: process.env.DATABASE_URL,
-    createTableIfMissing: false, // Table already exists in schema
+    createTableIfMissing: true, // Allow creation of session table
     ttl: 7 * 24 * 60 * 60, // 7 days
+    tableName: 'session', // Use consistent table name
   });
 
   const sessionSettings: session.SessionOptions = {
