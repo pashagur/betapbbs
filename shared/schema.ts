@@ -77,6 +77,7 @@ export const insertMessageSchema = createInsertSchema(messages).pick({
 
 export const upsertUserSchema = createInsertSchema(users).pick({
   id: true,
+  username: true,
   email: true,
   firstName: true,
   lastName: true,

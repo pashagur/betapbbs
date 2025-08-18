@@ -9,7 +9,7 @@ import {
   type MessageWithUser,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, count } from "drizzle-orm";
+import { eq, desc, count, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 export interface IStorage {
@@ -45,7 +45,10 @@ export class DatabaseStorage implements IStorage {
   async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values({
+        ...userData,
+        username: userData.username || `user_${Date.now()}`,
+      })
       .onConflictDoUpdate({
         target: users.id,
         set: {

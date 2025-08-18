@@ -1,25 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./auth";
 import { insertMessageSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  await setupAuth(app);
-
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  setupAuth(app);
 
   // Message routes
   app.get('/api/messages', isAuthenticated, async (req, res) => {
@@ -39,7 +27,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const messageData = insertMessageSchema.parse({
         ...req.body,
         userId,
@@ -64,7 +52,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/messages/:id', isAuthenticated, async (req: any, res) => {
     try {
       const messageId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       const success = await storage.deleteMessage(messageId, userId);
       
@@ -82,7 +70,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin routes
   app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const currentUser = await storage.getUser(userId);
       
       if (!currentUser || currentUser.role !== 1) {
@@ -99,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/admin/users/:id/role', isAuthenticated, async (req: any, res) => {
     try {
-      const adminId = req.user.claims.sub;
+      const adminId = req.user.id;
       const targetUserId = req.params.id;
       const { role } = req.body;
       
@@ -118,7 +106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/admin/users/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const adminId = req.user.claims.sub;
+      const adminId = req.user.id;
       const targetUserId = req.params.id;
       
       const adminUser = await storage.getUser(adminId);

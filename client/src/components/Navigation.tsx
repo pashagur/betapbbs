@@ -1,11 +1,43 @@
 import { useAuth } from "@/hooks/useAuth";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { getBadgeInfo } from "@/lib/badges";
 import { VERSION_INFO } from "@/lib/version";
+import type { User } from "@shared/schema";
 
 export default function Navigation() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const badgeInfo = user ? getBadgeInfo(user.postCount || 0) : null;
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/logout");
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Logged out successfully",
+      });
+      queryClient.setQueryData(["/api/user"], null);
+      window.location.href = "/";
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to log out",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    logoutMutation.mutate();
+  };
 
   return (
     <nav className="bg-dark border-b border-gray-700 py-4">
@@ -86,14 +118,15 @@ export default function Navigation() {
                     Settings
                   </a>
                   <hr className="border-gray-700" />
-                  <a 
-                    href="/api/logout" 
-                    className="flex items-center px-4 py-2 text-red-400 hover:bg-gray-700 rounded-b-lg"
-                    data-testid="link-logout"
+                  <button 
+                    onClick={handleLogout}
+                    disabled={logoutMutation.isPending}
+                    className="flex items-center w-full px-4 py-2 text-red-400 hover:bg-gray-700 rounded-b-lg disabled:opacity-50"
+                    data-testid="button-logout"
                   >
                     <i className="fas fa-sign-out-alt mr-2"></i>
-                    Logout
-                  </a>
+                    {logoutMutation.isPending ? "Logging out..." : "Logout"}
+                  </button>
                 </div>
               </div>
             )}

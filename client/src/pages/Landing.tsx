@@ -16,7 +16,7 @@ export default function Landing() {
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-400">v1.2.1 • Build: 2024-01-15</span>
               <Button 
-                onClick={() => window.location.href = '/api/login'}
+                onClick={() => window.location.href = '/auth'}
                 className="bg-blue-600 hover:bg-blue-700"
                 data-testid="button-login"
               >
@@ -39,7 +39,7 @@ export default function Landing() {
           </p>
           <Button 
             size="lg"
-            onClick={() => window.location.href = '/api/login'}
+            onClick={() => window.location.href = '/auth'}
             className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-3"
             data-testid="button-get-started"
           >
@@ -101,7 +101,7 @@ export default function Landing() {
             </p>
             <Button 
               size="lg"
-              onClick={() => window.location.href = '/api/login'}
+              onClick={() => window.location.href = '/auth'}
               className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3"
               data-testid="button-join-now"
             >
