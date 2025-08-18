@@ -1,4 +1,4 @@
-# Community Bulletin Board
+# Beta BSS - Community Bulletin Board
 
 ## Overview
 

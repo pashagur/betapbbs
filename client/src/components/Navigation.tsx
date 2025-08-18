@@ -46,7 +46,7 @@ export default function Navigation() {
         <div className="flex items-center justify-between">
           <a href="/" className="flex items-center space-x-2 text-white text-xl font-bold">
             <i className="fas fa-comments text-blue-500"></i>
-            <span>Community Board</span>
+            <span>Beta BSS</span>
           </a>
           
           <div className="flex items-center space-x-4">

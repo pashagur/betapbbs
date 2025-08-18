@@ -71,7 +71,7 @@ export default function Home() {
           <div className="bg-gray-800 rounded-lg p-6 text-center border border-gray-700">
             <h2 className="text-3xl font-bold mb-2 flex items-center justify-center">
               <i className="fas fa-bullhorn mr-3 text-blue-500"></i>
-              Community Bulletin Board
+              Beta BSS
             </h2>
             <p className="text-gray-300">
               <span data-testid="text-message-count">

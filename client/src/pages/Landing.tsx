@@ -11,7 +11,7 @@ export default function Landing() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <MessageSquare className="h-8 w-8 text-blue-500" />
-              <span className="text-xl font-bold">Community Board</span>
+              <span className="text-xl font-bold">Beta BSS</span>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-400">v1.2.1 • Build: 2024-01-15</span>
@@ -31,10 +31,10 @@ export default function Landing() {
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold mb-6">
-            Welcome to Community Board
+            Welcome to Beta BSS
           </h1>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Join our vibrant community of developers, designers, and creators. 
+            Join our vibrant community bulletin board for developers, designers, and creators. 
             Share your thoughts, connect with others, and grow together.
           </p>
           <Button 
