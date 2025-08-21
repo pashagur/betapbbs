@@ -54,10 +54,6 @@ def cleanup_database():
         cur.execute("ALTER SEQUENCE messages_id_seq RESTART WITH 1")
         print("Reset messages ID sequence")
         
-        # Clear sessions table
-        cur.execute("DELETE FROM sessions")
-        print("Cleared session data")
-        
         # Commit the changes
         conn.commit()
         print("Database cleanup completed successfully!")
@@ -89,11 +85,11 @@ def verify_database_structure():
             SELECT table_name 
             FROM information_schema.tables 
             WHERE table_schema = 'public' 
-            AND table_name IN ('users', 'messages', 'sessions')
+            AND table_name IN ('users', 'messages')
         """)
         
         existing_tables = [row[0] for row in cur.fetchall()]
-        required_tables = ['users', 'messages', 'sessions']
+        required_tables = ['users', 'messages']
         
         missing_tables = [table for table in required_tables if table not in existing_tables]
         
