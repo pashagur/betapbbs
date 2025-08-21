@@ -76,7 +76,12 @@ export default function Navigation() {
                       <i className="fas fa-user text-gray-300"></i>
                     )}
                   </div>
-                  <span data-testid="text-nav-username">{user.username}</span>
+                  <span data-testid="text-nav-username">
+                    {user.firstName && user.lastName 
+                      ? `${user.firstName} ${user.lastName}`
+                      : user.username
+                    }
+                  </span>
                   {badgeInfo && (
                     <span 
                       className={badgeInfo.className} 

@@ -77,7 +77,12 @@ export default function Home() {
               <span data-testid="text-message-count">
                 {messagesData?.totalCount || 0}
               </span> messages from our community
-              • Welcome back, <strong data-testid="text-username">{user?.username}</strong>!
+              • Welcome back, <strong data-testid="text-username">
+                {user?.firstName && user?.lastName 
+                  ? `${user.firstName} ${user.lastName}`
+                  : user?.username
+                }
+              </strong>!
             </p>
           </div>
         </div>
