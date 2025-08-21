@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { formatDistanceToNow, format } from "date-fns";
 import { getBadgeInfo } from "@/lib/badges";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import type { MessageWithUser, User } from "@shared/schema";
 
 interface MessageCardProps {
@@ -11,12 +14,39 @@ interface MessageCardProps {
 export default function MessageCard({ message, currentUser }: MessageCardProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const badgeInfo = getBadgeInfo(message.user.postCount || 0);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const canDelete = message.userId === currentUser.id || currentUser.role === 1;
   const isAuthor = message.userId === currentUser.id;
 
+  const deleteMessageMutation = useMutation({
+    mutationFn: async (messageId: number) => {
+      await apiRequest("DELETE", `/api/messages/${messageId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Message deleted successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+      setShowDeleteModal(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete message. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    deleteMessageMutation.mutate(message.id);
   };
 
   return (
@@ -27,9 +57,9 @@ export default function MessageCard({ message, currentUser }: MessageCardProps) 
       >
         <div className="flex items-start space-x-4">
           <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center flex-shrink-0">
-            {message.user.avatarUrl || message.user.profileImageUrl ? (
+            {(message.user.avatarUrl || message.user.profileImageUrl) ? (
               <img 
-                src={message.user.avatarUrl || message.user.profileImageUrl} 
+                src={message.user.avatarUrl || message.user.profileImageUrl || ""} 
                 alt="User avatar" 
                 className="w-full h-full rounded-full object-cover"
                 data-testid={`img-avatar-${message.id}`}
@@ -74,7 +104,7 @@ export default function MessageCard({ message, currentUser }: MessageCardProps) 
                 className="text-gray-400"
                 data-testid={`text-timestamp-${message.id}`}
               >
-                {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
+                {message.timestamp ? formatDistanceToNow(new Date(message.timestamp), { addSuffix: true }) : 'Unknown time'}
               </small>
             </div>
             
@@ -91,7 +121,7 @@ export default function MessageCard({ message, currentUser }: MessageCardProps) 
                 data-testid={`text-full-timestamp-${message.id}`}
               >
                 <i className="fas fa-clock mr-1"></i>
-                {format(new Date(message.timestamp), 'MMMM d, yyyy \'at\' h:mm a')}
+                {message.timestamp ? format(new Date(message.timestamp), 'MMMM d, yyyy \'at\' h:mm a') : 'Unknown date'}
               </small>
               
               {canDelete && (
@@ -135,15 +165,13 @@ export default function MessageCard({ message, currentUser }: MessageCardProps) 
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  // TODO: Implement delete functionality
-                  setShowDeleteModal(false);
-                }}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition-colors"
+                onClick={handleConfirmDelete}
+                disabled={deleteMessageMutation.isPending}
+                className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-red-700 disabled:opacity-50 text-white py-2 px-4 rounded transition-colors"
                 data-testid="button-confirm-delete"
               >
                 <i className="fas fa-trash mr-2"></i>
-                Delete
+                {deleteMessageMutation.isPending ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>
