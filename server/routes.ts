@@ -165,7 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       await storage.deleteUser(userId);
       
-      req.logout((err) => {
+      req.logout((err: any) => {
         if (err) {
           console.error("Error logging out after account deletion:", err);
         }
