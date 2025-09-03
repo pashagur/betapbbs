@@ -136,9 +136,12 @@ export function setupAuth(app: Express) {
           id: user.id,
           username: user.username,
           email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
           role: user.role,
           postCount: user.postCount,
           dateJoined: user.dateJoined,
+          isActive: user.isActive,
         });
       });
     } catch (error) {
@@ -170,9 +173,12 @@ export function setupAuth(app: Express) {
           id: user.id,
           username: user.username,
           email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
           role: user.role,
           postCount: user.postCount,
           dateJoined: user.dateJoined,
+          isActive: user.isActive,
         });
       });
     })(req, res, next);
@@ -195,11 +201,14 @@ export function setupAuth(app: Express) {
       id: req.user.id,
       username: req.user.username,
       email: req.user.email,
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
       role: req.user.role,
       postCount: req.user.postCount,
       dateJoined: req.user.dateJoined,
       profileImageUrl: req.user.profileImageUrl,
       avatarUrl: req.user.avatarUrl,
+      isActive: req.user.isActive,
     });
   });
 }
