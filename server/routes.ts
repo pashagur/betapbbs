@@ -131,9 +131,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/profile', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const { email, firstName, lastName } = req.body;
+      const { email, firstName, lastName, passwordHint } = req.body;
       
-      await storage.updateUserProfile(userId, { email, firstName, lastName });
+      await storage.updateUserProfile(userId, { email, firstName, lastName, passwordHint });
       const user = await storage.getUser(userId);
       
       res.json(user);

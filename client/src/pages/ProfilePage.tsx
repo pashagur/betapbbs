@@ -22,6 +22,7 @@ export default function ProfilePage() {
     email: user?.email || "",
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
+    passwordHint: user?.passwordHint || "",
   });
 
   const badgeInfo = user ? getBadgeInfo(user.postCount || 0) : null;
@@ -58,6 +59,7 @@ export default function ProfilePage() {
       email: user?.email || "",
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
+      passwordHint: user?.passwordHint || "",
     });
     setIsEditing(false);
   };
@@ -172,6 +174,22 @@ export default function ProfilePage() {
                         />
                       </div>
                       
+                      <div>
+                        <Label htmlFor="passwordHint" className="text-gray-300">
+                          Password Hint
+                        </Label>
+                        <Input
+                          id="passwordHint"
+                          type="text"
+                          value={profileData.passwordHint}
+                          onChange={(e) => setProfileData(prev => ({ ...prev, passwordHint: e.target.value }))}
+                          className="bg-gray-700 border-gray-600 text-white"
+                          placeholder="A hint to help you remember your password"
+                          data-testid="input-profile-passwordhint"
+                        />
+                        <p className="text-xs text-gray-400 mt-1">This is private and only visible to you</p>
+                      </div>
+                      
                       <div className="flex space-x-2">
                         <Button
                           type="submit"
@@ -210,6 +228,12 @@ export default function ProfilePage() {
                         <Calendar className="w-5 h-5 text-gray-400 mr-3" />
                         <span className="text-gray-300">
                           Joined {user.dateJoined ? formatDistanceToNow(new Date(user.dateJoined), { addSuffix: true }) : 'recently'}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <i className="fas fa-key w-5 h-5 text-gray-400 mr-3"></i>
+                        <span className="text-gray-300">
+                          Password Hint: {user.passwordHint || "Not set"}
                         </span>
                       </div>
                     </div>

@@ -30,7 +30,7 @@ export interface IStorage {
   getMessageCount(): Promise<number>;
   
   // Profile operations
-  updateUserProfile(userId: string, data: { email?: string; firstName?: string; lastName?: string }): Promise<void>;
+  updateUserProfile(userId: string, data: { email?: string; firstName?: string; lastName?: string; passwordHint?: string }): Promise<void>;
   changePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean>;
   
   // Admin operations
@@ -160,7 +160,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Profile operations
-  async updateUserProfile(userId: string, data: { email?: string; firstName?: string; lastName?: string }): Promise<void> {
+  async updateUserProfile(userId: string, data: { email?: string; firstName?: string; lastName?: string; passwordHint?: string }): Promise<void> {
     await db
       .update(users)
       .set({
