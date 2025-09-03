@@ -142,6 +142,7 @@ export function setupAuth(app: Express) {
           postCount: user.postCount,
           dateJoined: user.dateJoined,
           isActive: user.isActive,
+          passwordHint: user.passwordHint,
         });
       });
     } catch (error) {
@@ -179,6 +180,7 @@ export function setupAuth(app: Express) {
           postCount: user.postCount,
           dateJoined: user.dateJoined,
           isActive: user.isActive,
+          passwordHint: user.passwordHint,
         });
       });
     })(req, res, next);
@@ -209,6 +211,7 @@ export function setupAuth(app: Express) {
       profileImageUrl: req.user.profileImageUrl,
       avatarUrl: req.user.avatarUrl,
       isActive: req.user.isActive,
+      passwordHint: req.user.passwordHint,
     });
   });
 }
