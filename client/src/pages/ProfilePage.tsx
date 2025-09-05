@@ -23,7 +23,7 @@ export default function ProfilePage() {
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
     passwordHint: user?.passwordHint || "",
-    avatarUrl: user?.avatarUrl || "",
+    avatarUrl: "",
   });
 
   const badgeInfo = user ? getBadgeInfo(user.postCount || 0) : null;
@@ -61,10 +61,8 @@ export default function ProfilePage() {
         description: "Avatar updated successfully!",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      // Update local state with new avatar
-      if (data.user) {
-        setProfileData(prev => ({ ...prev, avatarUrl: data.user.avatarUrl || "" }));
-      }
+      // Clear the avatar URL input after successful upload
+      setProfileData(prev => ({ ...prev, avatarUrl: "" }));
     },
     onError: (error: any) => {
       toast({
@@ -93,7 +91,7 @@ export default function ProfilePage() {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
       passwordHint: user?.passwordHint || "",
-      avatarUrl: user?.avatarUrl || "",
+      avatarUrl: "",
     });
     setIsEditing(false);
   };
@@ -103,7 +101,7 @@ export default function ProfilePage() {
     if (!avatarUrl) {
       toast({
         title: "Error",
-        description: "Please enter a valid image URL",
+        description: "Please enter URL",
         variant: "destructive",
       });
       return;
