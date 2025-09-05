@@ -2,12 +2,31 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
-import { insertMessageSchema } from "@shared/schema";
+import { insertMessageSchema, updateProfileSchema } from "@shared/schema";
 import { z } from "zod";
+import { downloadAndProcessAvatar, deleteAvatarFile } from "./avatarUtils";
+import path from "path";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   setupAuth(app);
+
+  // Serve static avatar files
+  app.use('/avatars', (req, res, next) => {
+    const filename = path.basename(req.path);
+    const filepath = path.join(process.cwd(), 'avatars', filename);
+    
+    // Basic security check
+    if (!filename.match(/^[a-f0-9-_]+\.(webp|jpg|jpeg|png)$/i)) {
+      return res.status(404).send('File not found');
+    }
+    
+    res.sendFile(filepath, (err) => {
+      if (err) {
+        res.status(404).send('Avatar not found');
+      }
+    });
+  });
 
   // Message routes
   app.get('/api/messages', isAuthenticated, async (req, res) => {
@@ -131,15 +150,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/profile', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const { email, firstName, lastName, passwordHint } = req.body;
       
-      await storage.updateUserProfile(userId, { email, firstName, lastName, passwordHint });
+      // Validate profile data
+      const profileData = updateProfileSchema.parse(req.body);
+      
+      await storage.updateUserProfile(userId, profileData);
       const user = await storage.getUser(userId);
       
       res.json(user);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid profile data", errors: error.errors });
+      }
       console.error("Error updating profile:", error);
       res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Avatar upload endpoint
+  app.post('/api/profile/avatar', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { imageUrl } = req.body;
+
+      if (!imageUrl || typeof imageUrl !== 'string') {
+        return res.status(400).json({ message: "Image URL is required" });
+      }
+
+      // Get current user to check for existing avatar
+      const currentUser = await storage.getUser(userId);
+      const oldAvatarUrl = currentUser?.avatarUrl;
+
+      // Download and process the image
+      const avatarPath = await downloadAndProcessAvatar(imageUrl, userId);
+      
+      // Update user avatar in database
+      await storage.updateUserAvatar(userId, avatarPath);
+      
+      // Delete old avatar file if it exists
+      if (oldAvatarUrl && oldAvatarUrl !== avatarPath) {
+        await deleteAvatarFile(oldAvatarUrl);
+      }
+
+      // Return updated user data
+      const updatedUser = await storage.getUser(userId);
+      res.json({ 
+        message: "Avatar updated successfully", 
+        user: updatedUser 
+      });
+
+    } catch (error) {
+      console.error("Error updating avatar:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to update avatar" 
+      });
     }
   });
 

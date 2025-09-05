@@ -13,7 +13,16 @@ import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Session storage table is managed by connect-pg-simple
+// Session storage table for express-session
+export const sessions = pgTable(
+  "session",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
 
 // User storage table with bulletin board specific fields
 export const users = pgTable("users", {
@@ -75,10 +84,19 @@ export const upsertUserSchema = createInsertSchema(users).pick({
   profileImageUrl: true,
 });
 
+export const updateProfileSchema = createInsertSchema(users).pick({
+  email: true,
+  firstName: true,
+  lastName: true,
+  passwordHint: true,
+  avatarUrl: true,
+}).partial();
+
 // Types
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpdateProfile = z.infer<typeof updateProfileSchema>;
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 

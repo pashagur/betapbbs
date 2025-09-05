@@ -23,6 +23,7 @@ export default function ProfilePage() {
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
     passwordHint: user?.passwordHint || "",
+    avatarUrl: user?.avatarUrl || "",
   });
 
   const badgeInfo = user ? getBadgeInfo(user.postCount || 0) : null;
@@ -49,6 +50,31 @@ export default function ProfilePage() {
     },
   });
 
+  const uploadAvatarMutation = useMutation({
+    mutationFn: async (imageUrl: string) => {
+      const res = await apiRequest("POST", "/api/profile/avatar", { imageUrl });
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Success",
+        description: "Avatar updated successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      // Update local state with new avatar
+      if (data.user) {
+        setProfileData(prev => ({ ...prev, avatarUrl: data.user.avatarUrl || "" }));
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error", 
+        description: error.message || "Failed to update avatar",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     updateProfileMutation.mutate(profileData);
@@ -60,8 +86,22 @@ export default function ProfilePage() {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
       passwordHint: user?.passwordHint || "",
+      avatarUrl: user?.avatarUrl || "",
     });
     setIsEditing(false);
+  };
+
+  const handleAvatarUpload = () => {
+    const avatarUrl = profileData.avatarUrl.trim();
+    if (!avatarUrl) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid image URL",
+        variant: "destructive",
+      });
+      return;
+    }
+    uploadAvatarMutation.mutate(avatarUrl);
   };
 
   if (!user) {
@@ -96,7 +136,23 @@ export default function ProfilePage() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-2xl font-bold mr-4">
+                  {user.avatarUrl ? (
+                    <img 
+                      src={user.avatarUrl} 
+                      alt={`${user.username}'s avatar`}
+                      className="w-16 h-16 rounded-full object-cover mr-4"
+                      onError={(e) => {
+                        // Fallback to initial if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const fallback = target.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div 
+                    className={`w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-2xl font-bold mr-4 ${user.avatarUrl ? 'hidden' : ''}`}
+                  >
                     {user.username.charAt(0).toUpperCase()}
                   </div>
                   <div>
@@ -189,6 +245,35 @@ export default function ProfilePage() {
                         />
                         <p className="text-xs text-gray-400 mt-1">This is private and only visible to you</p>
                       </div>
+
+                      <div>
+                        <Label htmlFor="avatarUrl" className="text-gray-300">
+                          Avatar Image URL
+                        </Label>
+                        <div className="flex space-x-2">
+                          <Input
+                            id="avatarUrl"
+                            type="url"
+                            value={profileData.avatarUrl}
+                            onChange={(e) => setProfileData(prev => ({ ...prev, avatarUrl: e.target.value }))}
+                            className="bg-gray-700 border-gray-600 text-white flex-1"
+                            placeholder="https://example.com/image.jpg"
+                            data-testid="input-avatar-url"
+                          />
+                          <Button
+                            type="button"
+                            onClick={handleAvatarUpload}
+                            disabled={uploadAvatarMutation.isPending || !profileData.avatarUrl.trim()}
+                            className="bg-green-600 hover:bg-green-700"
+                            data-testid="button-upload-avatar"
+                          >
+                            {uploadAvatarMutation.isPending ? "Uploading..." : "Upload"}
+                          </Button>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Enter a direct link to an image. Supported formats: JPEG, PNG, WebP, GIF
+                        </p>
+                      </div>
                       
                       <div className="flex space-x-2">
                         <Button
@@ -272,12 +357,12 @@ export default function ProfilePage() {
                         </div>
                       </div>
                       {/* Show progress to next badge level */}
-                      {user.postCount < 50 && (
+                      {(user.postCount || 0) < 50 && (
                         <div className="mt-2 text-sm text-gray-400">
-                          {user.postCount < 5 ? `${5 - user.postCount} more posts to reach Active Member` :
-                           user.postCount < 10 ? `${10 - user.postCount} more posts to reach Bronze Contributor` :
-                           user.postCount < 25 ? `${25 - user.postCount} more posts to reach Silver Contributor` :
-                           `${50 - user.postCount} more posts to reach Gold Contributor`}
+                          {(user.postCount || 0) < 5 ? `${5 - (user.postCount || 0)} more posts to reach Active Member` :
+                           (user.postCount || 0) < 10 ? `${10 - (user.postCount || 0)} more posts to reach Bronze Contributor` :
+                           (user.postCount || 0) < 25 ? `${25 - (user.postCount || 0)} more posts to reach Silver Contributor` :
+                           `${50 - (user.postCount || 0)} more posts to reach Gold Contributor`}
                         </div>
                       )}
                     </div>

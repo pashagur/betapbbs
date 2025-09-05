@@ -7,6 +7,7 @@ import {
   type Message,
   type InsertMessage,
   type MessageWithUser,
+  type UpdateProfile,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, count, sql } from "drizzle-orm";
@@ -30,8 +31,9 @@ export interface IStorage {
   getMessageCount(): Promise<number>;
   
   // Profile operations
-  updateUserProfile(userId: string, data: { email?: string; firstName?: string; lastName?: string; passwordHint?: string }): Promise<void>;
+  updateUserProfile(userId: string, data: UpdateProfile): Promise<void>;
   changePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean>;
+  updateUserAvatar(userId: string, avatarUrl: string): Promise<void>;
   
   // Admin operations
   getAllUsers(): Promise<User[]>;
@@ -160,11 +162,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Profile operations
-  async updateUserProfile(userId: string, data: { email?: string; firstName?: string; lastName?: string; passwordHint?: string }): Promise<void> {
+  async updateUserProfile(userId: string, data: UpdateProfile): Promise<void> {
     await db
       .update(users)
       .set({
         ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async updateUserAvatar(userId: string, avatarUrl: string): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        avatarUrl,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
