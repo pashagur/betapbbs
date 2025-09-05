@@ -29,7 +29,7 @@ export default function ProfilePage() {
   const badgeInfo = user ? getBadgeInfo(user.postCount || 0) : null;
 
   const updateProfileMutation = useMutation({
-    mutationFn: async (data: typeof profileData) => {
+    mutationFn: async (data: { email: string; firstName: string; lastName: string; passwordHint: string; }) => {
       const res = await apiRequest("PUT", "/api/profile", data);
       return await res.json();
     },
@@ -77,7 +77,14 @@ export default function ProfilePage() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfileMutation.mutate(profileData);
+    // Only update profile data, not avatar
+    const profileUpdateData = {
+      email: profileData.email,
+      firstName: profileData.firstName,
+      lastName: profileData.lastName,
+      passwordHint: profileData.passwordHint,
+    };
+    updateProfileMutation.mutate(profileUpdateData);
   };
 
   const handleCancel = () => {
