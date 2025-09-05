@@ -90,7 +90,9 @@ export const updateProfileSchema = createInsertSchema(users).pick({
   lastName: true,
   passwordHint: true,
   avatarUrl: true,
-}).partial();
+}).partial().extend({
+  avatarUrl: z.string().optional(),
+});
 
 // Types
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
